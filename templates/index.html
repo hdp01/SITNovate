@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Storage Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+        }
+        .nav-link {
+            color: white !important;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Cloud Storage</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Sign Up Link -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a>
+                    </li>
+                    <!-- Login Link -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <!-- Upload Link -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#upload">Upload</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container text-center my-5">
+        <h1 class="mb-4">Welcome to Cloud Storage Platform</h1>
+        <p>Your secure and reliable cloud storage solution.</p>
+    </div>
+
+    <!-- Image Section -->
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-md-6 image-container">
+                <img src="{{ url_for('static', filename='images/image2.jpeg') }}" alt="Cloud System">
+            </div>
+            <div class="col-md-6 image-container">
+                <img src="{{ url_for('static', filename='images/image3.jpeg') }}" alt="Cloud Computing">
+            </div>
+        </div>
+    </div>
+
+    <!-- Get Started Button -->
+    <div class="container text-center my-5">
+        <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg">Get Started</a>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

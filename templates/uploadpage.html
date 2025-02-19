@@ -3,178 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Page with Chatbot</title>
+    <title>Image Upload with Transformations</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.10.2/mdb.min.css">
     <style>
         body {
             background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
         }
         .upload-container {
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
+            margin-bottom: 20px;
         }
-        .chatbot-icon {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #007bff;
-            color: white;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .chat-popup {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 400px;
-            display: none;
+        .history-section {
             background: white;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .chat-body {
-            height: 500px;
+            height: 80vh;
             overflow-y: auto;
+        }
+        .history-item {
             padding: 10px;
+            border-bottom: 1px solid #ddd;
         }
-        .chat-message {
-            padding: 5px 10px;
-            border-radius: 10px;
-            max-width: 80%;
-            margin-bottom: 8px;
+        .transform-options {
+            margin-bottom: 20px;
         }
-        .chatbot-message {
-            background: #f1f1f1;
-            align-self: flex-start;
+        .transform-options label {
+            font-weight: bold;
+            margin-bottom: 5px;
         }
-        .user-message {
-            background: #007bff;
-            color: white;
-            align-self: flex-end;
+        .transform-options input,
+        .transform-options select {
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container py-5">
-        <div class="row d-flex justify-content-center">
-            <div class="col-md-6">
+        <div class="row">
+            <!-- Upload Section -->
+            <div class="col-md-8">
                 <div class="upload-container">
-                    <button class="btn btn-primary" onclick="validateUpload()">Upload</button>
-                    <select id="formatSelector" class="form-select">
-                        <option value="image/png">PNG</option>
-                        <option value="image/jpeg">JPEG</option>
-                        <option value="image/gif">GIF</option>
-                    </select>
+                    <h3>Upload Image</h3>
+                    <div class="transform-options">
+                        <!-- Width and Height -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="width">Width (10-3840px)</label>
+                                <input type="number" id="width" class="form-control" min="10" max="3840" placeholder="Width">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="height">Height (10-3840px)</label>
+                                <input type="number" id="height" class="form-control" min="10" max="3840" placeholder="Height">
+                            </div>
+                        </div>
+
+                        <!-- Quality -->
+                        <label for="quality">Quality (1-100)</label>
+                        <input type="number" id="quality" class="form-control" min="1" max="100" value="85" placeholder="Quality">
+
+                        <!-- Format -->
+                        <label for="format">Format</label>
+                        <select id="format" class="form-select">
+                            <option value="jpg">JPEG</option>
+                            <option value="png">PNG</option>
+                            <option value="webp">WEBP</option>
+                        </select>
+
+                        <!-- Resize Mode -->
+                        <label for="resizeMode">Resize Mode</label>
+                        <select id="resizeMode" class="form-select">
+                            <option value="fill">Fill</option>
+                            <option value="fit">Fit</option>
+                            <option value="crop">Crop</option>
+                            <option value="thumb">Thumbnail</option>
+                        </select>
+
+                        <!-- Background Color -->
+                        <label for="background">Background Color (Hex)</label>
+                        <input type="color" id="background" class="form-control" value="#ffffff">
+
+                        <!-- Maintain EXIF -->
+                        <label for="maintainExif">Maintain EXIF Metadata</label>
+                        <select id="maintainExif" class="form-select">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+
+                    <!-- File Input and Upload Button -->
                     <input type="file" class="form-control" id="fileInput" accept="image/*">
+                    <button class="btn btn-primary mt-3" onclick="validateUpload()">Upload</button>
+                </div>
+            </div>
+
+            <!-- Show History Section -->
+            <div class="col-md-4">
+                <div class="history-section">
+                    <h4>Upload History</h4>
+                    <div id="uploadHistory"></div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Chatbot Icon -->
-    <div class="chatbot-icon" onclick="toggleChat()">
-        <i class="fas fa-comment"></i>
     </div>
 
-    <!-- Chatbot Popup -->
-    <div class="chat-popup" id="chatPopup">
-        <div class="card">
-            <div class="card-body chat-body" id="chatBody">
-                <div class="d-flex flex-row justify-content-start">
-                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava5-bg.webp" alt="avatar" style="width: 35px; height: 35px;">
-                    <div class="chat-message chatbot-message">Hello! How can I assist you?</div>
-                </div>
-            </div>
-            <div class="card-footer d-flex align-items-center p-3">
-                <input type="text" id="userInput" class="form-control form-control-lg" placeholder="Type message">
-                <a class="ms-3 link-info" href="#" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></a>
-            </div>
+    <!-- Toast Notification -->
+    <div class="toast" id="uploadToast" role="alert" aria-live="assertive" aria-atomic="true" data-mdb-autohide="true" data-mdb-delay="3000" style="position: fixed; bottom: 20px; right: 20px;">
+        <div class="toast-header">
+            <i class="fas fa-check-circle me-2 text-success"></i>
+            <strong class="me-auto">Success</strong>
+            <small>Just now</small>
+            <button type="button" class="btn-close" data-mdb-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Image uploaded successfully!
         </div>
     </div>
+
+    <!-- Cloudinary SDK -->
+    <script src="https://unpkg.com/cloudinary-core@2.11.4/cloudinary-core-shrinkwrap.min.js"></script>
 
     <script>
-        const API_KEY = "AIzaSyDL7fi3LJP5Z1RVY33WabBvBvKkHNGnI0E"; // Replace with your actual Gemini API Key
-
-        function toggleChat() {
-            var chatPopup = document.getElementById("chatPopup");
-            chatPopup.style.display = chatPopup.style.display === "none" || chatPopup.style.display === "" ? "block" : "none";
-        }
+        // Cloudinary configuration
+        const cloudinary = cloudinary.Cloudinary.new({ cloud_name: "YOUR_CLOUD_NAME" });
 
         function validateUpload() {
-            var fileInput = document.getElementById("fileInput");
-            var formatSelector = document.getElementById("formatSelector").value;
-            var file = fileInput.files[0];
-            
+            const fileInput = document.getElementById("fileInput");
+            const file = fileInput.files[0];
+
             if (!file) {
                 alert("Please select a file to upload.");
                 return;
             }
-            
-            if (file.type !== formatSelector) {
-                alert("Invalid file format! Please upload a " + formatSelector + " file.");
-                fileInput.value = ""; // Reset file input
-                return;
-            }
-            
-            alert("File uploaded successfully!");
+
+            // Get transformation options
+            const width = document.getElementById("width").value;
+            const height = document.getElementById("height").value;
+            const quality = document.getElementById("quality").value;
+            const format = document.getElementById("format").value;
+            const resizeMode = document.getElementById("resizeMode").value;
+            const background = document.getElementById("background").value.replace("#", "");
+            const maintainExif = document.getElementById("maintainExif").value === "true";
+
+            // Upload the file to Cloudinary with transformations
+            uploadFileToCloudinary(file, { width, height, quality, format, resizeMode, background, maintainExif });
         }
 
-        async function sendMessage() {
-            let userInput = document.getElementById("userInput").value.trim();
-            if (!userInput) return;
+        function uploadFileToCloudinary(file, options) {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("upload_preset", "YOUR_UPLOAD_PRESET"); // Replace with your upload preset
+            formData.append("api_key", "YOUR_API_KEY"); // Replace with your API key
 
-            let chatBody = document.getElementById("chatBody");
-
-            // Append user message
-            let userMessageDiv = document.createElement("div");
-            userMessageDiv.classList.add("d-flex", "flex-row", "justify-content-end");
-            userMessageDiv.innerHTML = `<div class="chat-message user-message">${userInput}</div>`;
-            chatBody.appendChild(userMessageDiv);
-            document.getElementById("userInput").value = ""; // Clear input field
-
-            // Scroll to bottom
-            chatBody.scrollTop = chatBody.scrollHeight;
-
-            try {
-                let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: userInput }] }]
-                    })
-                });
-
-                let data = await response.json();
-                console.log("API Response:", data); // Debugging log
-
-                let botReply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't understand.";
-
-                // Append chatbot response
-                let botMessageDiv = document.createElement("div");
-                botMessageDiv.classList.add("d-flex", "flex-row", "justify-content-start");
-                botMessageDiv.innerHTML = `<img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava5-bg.webp" alt="avatar" style="width: 35px; height: 35px;">
-                                           <div class="chat-message chatbot-message">${botReply}</div>`;
-                chatBody.appendChild(botMessageDiv);
-
-                // Scroll to bottom
-                chatBody.scrollTop = chatBody.scrollHeight;
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Failed to connect to Gemini API.");
+            // Add transformations
+            const transformations = [];
+            if (options.width && options.height) {
+                transformations.push(`w_${options.width},h_${options.height},c_${options.resizeMode}`);
             }
+            if (options.quality) {
+                transformations.push(`q_${options.quality}`);
+            }
+            if (options.format) {
+                transformations.push(`f_${options.format}`);
+            }
+            if (options.background) {
+                transformations.push(`b_${options.background}`);
+            }
+            if (!options.maintainExif) {
+                transformations.push("fl_strip_profile"); // Remove EXIF metadata
+            }
+
+            const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudinary.config().cloud_name}/image/upload`;
+            if (transformations.length > 0) {
+                formData.append("transformation", transformations.join("/"));
+            }
+
+            fetch(cloudinaryUrl, {
+                method: "POST",
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Uploaded image URL:", data.secure_url);
+                addToUploadHistory(data.secure_url, file.name);
+
+                // Show toast notification
+                const uploadToast = new mdb.Toast(document.getElementById('uploadToast'));
+                uploadToast.show();
+            })
+            .catch(error => {
+                console.error("Upload failed:", error);
+                alert("Upload failed. Please try again.");
+            });
+        }
+
+        function addToUploadHistory(imageUrl, fileName) {
+            const uploadHistory = document.getElementById("uploadHistory");
+            const timestamp = new Date().toLocaleString();
+
+            const historyItem = document.createElement("div");
+            historyItem.classList.add("history-item");
+            historyItem.innerHTML = `
+                <strong>${fileName}</strong>
+                <small class="text-muted">${timestamp}</small>
+                <a href="${imageUrl}" download="${fileName}" class="btn btn-success btn-sm mt-2">Download</a>
+            `;
+
+            uploadHistory.prepend(historyItem); // Add the new item at the top
         }
     </script>
 

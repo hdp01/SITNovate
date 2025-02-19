@@ -9,17 +9,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # Initialize Flask app
 app = Flask(__name__)
 
-# 🔹 Configure Secret Key
+# Configure Secret Key
 app.config['SECRET_KEY'] = "your-secret-key"
 
-# 🔹 Database configuration
+# Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# 🔹 Initialize CSRF Protection
+# Initialize CSRF Protection
 csrf = CSRFProtect(app)
 
-# 🔹 Initialize Database
+# Initialize Database
 db = SQLAlchemy(app)
 
 # Define User model
@@ -44,9 +44,14 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     submit = SubmitField('Login')
 
-# 🔹 Create database tables
+# Create database tables
 with app.app_context():
     db.create_all()
+
+# Index Route
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 # Signup Route
 @app.route('/signup', methods=['GET', 'POST'])
@@ -70,7 +75,6 @@ def signup():
     return render_template('signup.html', form=form)
 
 # Login Route
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -81,7 +85,7 @@ def login():
         if user and check_password_hash(user.password, form.password.data):
             session['user_id'] = user.id  # Store user session
             flash('Login successful!', 'success')
-            return redirect(url_for('upload_page'))  # ✅ Redirects to uploadpage.html
+            return redirect(url_for('upload_page'))  # Redirect to upload page after login
         else:
             flash('Invalid email or password.', 'danger')
 
@@ -96,6 +100,13 @@ def upload_page():
     
     return render_template('uploadpage.html')
 
+# Logout Route
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)  # Clear user session
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('index'))
+
 # Run the app
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(debug=True)
