@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Image Processing Assistant</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="chat-box">
+        <div class="chat-header">
+          <h2>📷 Image Assistant</h2>
+          <p class="subtitle">I can help resize and optimize your images!</p>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <div class="bot-message">
+            <div class="message-content">
+              👋 Hi! Let's process your image. First, tell me what you need!
+              <div class="quick-options">
+                <button class="quick-btn" onclick="suggestAction('resize')">
+                  Resize
+                </button>
+                <button class="quick-btn" onclick="suggestAction('crop')">
+                  Crop
+                </button>
+                <button class="quick-btn" onclick="suggestAction('optimize')">
+                  Optimize
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-area">
+          <div class="upload-section" id="uploadSection">
+            <label class="upload-label">
+              <input type="file" id="imageInput" accept="image/*" hidden />
+              <span>📁 Upload Image</span>
+            </label>
+            <div id="fileName"></div>
+          </div>
+
+          <div class="input-group">
+            <input
+              type="text"
+              id="userInput"
+              placeholder="Example: 'Resize for Instagram post'"
+            />
+            <button onclick="handleSend()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
