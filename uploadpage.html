@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Page with Chatbot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.10.2/mdb.min.css">
+    <style>
+        body {
+            background-color: #f4f4f4;
+        }
+        .upload-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .chatbot-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .chat-popup {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 400px;
+            display: none;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .chat-body {
+            height: 500px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .chat-message {
+            padding: 5px 10px;
+            border-radius: 10px;
+            max-width: 80%;
+            margin-bottom: 8px;
+        }
+        .chatbot-message {
+            background: #f1f1f1;
+            align-self: flex-start;
+        }
+        .user-message {
+            background: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-6">
+                <div class="upload-container">
+                    <button class="btn btn-primary" onclick="validateUpload()">Upload</button>
+                    <select id="formatSelector" class="form-select">
+                        <option value="image/png">PNG</option>
+                        <option value="image/jpeg">JPEG</option>
+                        <option value="image/gif">GIF</option>
+                    </select>
+                    <input type="file" class="form-control" id="fileInput" accept="image/*">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chatbot Icon -->
+    <div class="chatbot-icon" onclick="toggleChat()">
+        <i class="fas fa-comment"></i>
+    </div>
+
+    <!-- Chatbot Popup -->
+    <div class="chat-popup" id="chatPopup">
+        <div class="card">
+            <div class="card-body chat-body" id="chatBody">
+                <div class="d-flex flex-row justify-content-start">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava5-bg.webp" alt="avatar" style="width: 35px; height: 35px;">
+                    <div class="chat-message chatbot-message">Hello! How can I assist you?</div>
+                </div>
+            </div>
+            <div class="card-footer d-flex align-items-center p-3">
+                <input type="text" id="userInput" class="form-control form-control-lg" placeholder="Type message">
+                <a class="ms-3 link-info" href="#" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = "AIzaSyDL7fi3LJP5Z1RVY33WabBvBvKkHNGnI0E"; // Replace with your actual Gemini API Key
+
+        function toggleChat() {
+            var chatPopup = document.getElementById("chatPopup");
+            chatPopup.style.display = chatPopup.style.display === "none" || chatPopup.style.display === "" ? "block" : "none";
+        }
+
+        function validateUpload() {
+            var fileInput = document.getElementById("fileInput");
+            var formatSelector = document.getElementById("formatSelector").value;
+            var file = fileInput.files[0];
+            
+            if (!file) {
+                alert("Please select a file to upload.");
+                return;
+            }
+            
+            if (file.type !== formatSelector) {
+                alert("Invalid file format! Please upload a " + formatSelector + " file.");
+                fileInput.value = ""; // Reset file input
+                return;
+            }
+            
+            alert("File uploaded successfully!");
+        }
+
+        async function sendMessage() {
+            let userInput = document.getElementById("userInput").value.trim();
+            if (!userInput) return;
+
+            let chatBody = document.getElementById("chatBody");
+
+            // Append user message
+            let userMessageDiv = document.createElement("div");
+            userMessageDiv.classList.add("d-flex", "flex-row", "justify-content-end");
+            userMessageDiv.innerHTML = `<div class="chat-message user-message">${userInput}</div>`;
+            chatBody.appendChild(userMessageDiv);
+            document.getElementById("userInput").value = ""; // Clear input field
+
+            // Scroll to bottom
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            try {
+                let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: userInput }] }]
+                    })
+                });
+
+                let data = await response.json();
+                console.log("API Response:", data); // Debugging log
+
+                let botReply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't understand.";
+
+                // Append chatbot response
+                let botMessageDiv = document.createElement("div");
+                botMessageDiv.classList.add("d-flex", "flex-row", "justify-content-start");
+                botMessageDiv.innerHTML = `<img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava5-bg.webp" alt="avatar" style="width: 35px; height: 35px;">
+                                           <div class="chat-message chatbot-message">${botReply}</div>`;
+                chatBody.appendChild(botMessageDiv);
+
+                // Scroll to bottom
+                chatBody.scrollTop = chatBody.scrollHeight;
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Failed to connect to Gemini API.");
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
