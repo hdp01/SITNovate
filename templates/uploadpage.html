@@ -3,221 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Upload with Transformations</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.10.2/mdb.min.css">
+    <title>Image Processor</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         body {
-            background-color: #f4f4f4;
-            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
         }
-        .upload-container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin-bottom: 20px;
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
         }
-        .history-section {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            height: 80vh;
-            overflow-y: auto;
+        .card {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        .history-item {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        .transform-options {
-            margin-bottom: 20px;
-        }
-        .transform-options label {
+        .card-header {
+            background-color: #0d6efd;
+            color: white;
             font-weight: bold;
-            margin-bottom: 5px;
         }
-        .transform-options input,
-        .transform-options select {
-            margin-bottom: 10px;
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        #preview {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .btn-success {
+            background-color: #198754;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+        .btn-success:hover {
+            background-color: #157347;
         }
     </style>
 </head>
 <body>
-    <div class="container py-5">
-        <div class="row">
-            <!-- Upload Section -->
-            <div class="col-md-8">
-                <div class="upload-container">
-                    <h3>Upload Image</h3>
-                    <div class="transform-options">
-                        <!-- Width and Height -->
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="width">Width (10-3840px)</label>
-                                <input type="number" id="width" class="form-control" min="10" max="3840" placeholder="Width">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="height">Height (10-3840px)</label>
-                                <input type="number" id="height" class="form-control" min="10" max="3840" placeholder="Height">
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Image Processor</h3>
+            </div>
+            <div class="card-body">
+                <!-- Image Upload -->
+                <div class="form-group">
+                    <label for="imageInput" class="form-label">Upload Image</label>
+                    <input type="file" class="form-control" id="imageInput" accept="image/*">
+                    <img id="preview" src="#" alt="Image Preview" style="display: none;">
+                </div>
+
+                <!-- Processing Request -->
+                <div class="form-group">
+                    <label for="processingRequest" class="form-label">Processing Request</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="processingRequest" placeholder="E.g.: 'Resize to 800x600 with 90% quality'">
+                        <button class="btn btn-primary" onclick="processRequest()">
+                            <i class="fas fa-magic"></i> Generate Parameters
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Parameters Form -->
+                <div id="paramsForm" style="display: none;">
+                    <h5 class="mb-3">Processing Parameters</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="width" class="form-label">Width</label>
+                                <input type="number" class="form-control" id="width" min="10" max="3840">
                             </div>
                         </div>
-
-                        <!-- Quality -->
-                        <label for="quality">Quality (1-100)</label>
-                        <input type="number" id="quality" class="form-control" min="1" max="100" value="85" placeholder="Quality">
-
-                        <!-- Format -->
-                        <label for="format">Format</label>
-                        <select id="format" class="form-select">
-                            <option value="jpg">JPEG</option>
-                            <option value="png">PNG</option>
-                            <option value="webp">WEBP</option>
-                        </select>
-
-                        <!-- Resize Mode -->
-                        <label for="resizeMode">Resize Mode</label>
-                        <select id="resizeMode" class="form-select">
-                            <option value="fill">Fill</option>
-                            <option value="fit">Fit</option>
-                            <option value="crop">Crop</option>
-                            <option value="thumb">Thumbnail</option>
-                        </select>
-
-                        <!-- Background Color -->
-                        <label for="background">Background Color (Hex)</label>
-                        <input type="color" id="background" class="form-control" value="#ffffff">
-
-                        <!-- Maintain EXIF -->
-                        <label for="maintainExif">Maintain EXIF Metadata</label>
-                        <select id="maintainExif" class="form-select">
-                            <option value="true">Yes</option>
-                            <option value="false">No</option>
-                        </select>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="height" class="form-label">Height</label>
+                                <input type="number" class="form-control" id="height" min="10" max="3840">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="quality" class="form-label">Quality (%)</label>
+                                <input type="number" class="form-control" id="quality" min="1" max="100" value="85">
+                            </div>
+                        </div>
                     </div>
-
-                    <!-- File Input and Upload Button -->
-                    <input type="file" class="form-control" id="fileInput" accept="image/*">
-                    <button class="btn btn-primary mt-3" onclick="validateUpload()">Upload</button>
-                </div>
-            </div>
-
-            <!-- Show History Section -->
-            <div class="col-md-4">
-                <div class="history-section">
-                    <h4>Upload History</h4>
-                    <div id="uploadHistory"></div>
+                    <button class="btn btn-success w-100" onclick="uploadToAWS()">
+                        <i class="fas fa-upload"></i> Send to AWS Lambda
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div class="toast" id="uploadToast" role="alert" aria-live="assertive" aria-atomic="true" data-mdb-autohide="true" data-mdb-delay="3000" style="position: fixed; bottom: 20px; right: 20px;">
-        <div class="toast-header">
-            <i class="fas fa-check-circle me-2 text-success"></i>
-            <strong class="me-auto">Success</strong>
-            <small>Just now</small>
-            <button type="button" class="btn-close" data-mdb-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-            Image uploaded successfully!
-        </div>
-    </div>
-
-    <!-- Cloudinary SDK -->
-    <script src="https://unpkg.com/cloudinary-core@2.11.4/cloudinary-core-shrinkwrap.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Cloudinary configuration
-        const cloudinary = cloudinary.Cloudinary.new({ cloud_name: "YOUR_CLOUD_NAME" });
+        let currentImage = null;
 
-        function validateUpload() {
-            const fileInput = document.getElementById("fileInput");
-            const file = fileInput.files[0];
+        // Image Preview
+        document.getElementById("imageInput").addEventListener("change", function (e) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const preview = document.getElementById("preview");
+                preview.src = reader.result;
+                preview.style.display = "block";
+            };
+            currentImage = e.target.files[0];
+            reader.readAsDataURL(currentImage);
+        });
 
-            if (!file) {
-                alert("Please select a file to upload.");
+        async function processRequest() {
+            const requestText = document.getElementById("processingRequest").value;
+
+            const response = await fetch("/process-request", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query: requestText }),
+            });
+
+            const params = await response.json();
+
+            // Populate form
+            document.getElementById("width").value = params.width || "";
+            document.getElementById("height").value = params.height || "";
+            document.getElementById("quality").value = params.quality || 85;
+            document.getElementById("paramsForm").style.display = "block";
+        }
+
+        async function uploadToAWS() {
+            if (!currentImage) {
+                alert("Please select an image first");
                 return;
             }
 
-            // Get transformation options
-            const width = document.getElementById("width").value;
-            const height = document.getElementById("height").value;
-            const quality = document.getElementById("quality").value;
-            const format = document.getElementById("format").value;
-            const resizeMode = document.getElementById("resizeMode").value;
-            const background = document.getElementById("background").value.replace("#", "");
-            const maintainExif = document.getElementById("maintainExif").value === "true";
-
-            // Upload the file to Cloudinary with transformations
-            uploadFileToCloudinary(file, { width, height, quality, format, resizeMode, background, maintainExif });
-        }
-
-        function uploadFileToCloudinary(file, options) {
             const formData = new FormData();
-            formData.append("file", file);
-            formData.append("upload_preset", "YOUR_UPLOAD_PRESET"); // Replace with your upload preset
-            formData.append("api_key", "YOUR_API_KEY"); // Replace with your API key
+            formData.append("image", currentImage);
+            formData.append("width", document.getElementById("width").value);
+            formData.append("height", document.getElementById("height").value);
+            formData.append("quality", document.getElementById("quality").value);
 
-            // Add transformations
-            const transformations = [];
-            if (options.width && options.height) {
-                transformations.push(`w_${options.width},h_${options.height},c_${options.resizeMode}`);
-            }
-            if (options.quality) {
-                transformations.push(`q_${options.quality}`);
-            }
-            if (options.format) {
-                transformations.push(`f_${options.format}`);
-            }
-            if (options.background) {
-                transformations.push(`b_${options.background}`);
-            }
-            if (!options.maintainExif) {
-                transformations.push("fl_strip_profile"); // Remove EXIF metadata
-            }
-
-            const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudinary.config().cloud_name}/image/upload`;
-            if (transformations.length > 0) {
-                formData.append("transformation", transformations.join("/"));
-            }
-
-            fetch(cloudinaryUrl, {
+            const response = await fetch("/upload-to-aws", {
                 method: "POST",
                 body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Uploaded image URL:", data.secure_url);
-                addToUploadHistory(data.secure_url, file.name);
-
-                // Show toast notification
-                const uploadToast = new mdb.Toast(document.getElementById('uploadToast'));
-                uploadToast.show();
-            })
-            .catch(error => {
-                console.error("Upload failed:", error);
-                alert("Upload failed. Please try again.");
             });
-        }
 
-        function addToUploadHistory(imageUrl, fileName) {
-            const uploadHistory = document.getElementById("uploadHistory");
-            const timestamp = new Date().toLocaleString();
-
-            const historyItem = document.createElement("div");
-            historyItem.classList.add("history-item");
-            historyItem.innerHTML = `
-                <strong>${fileName}</strong>
-                <small class="text-muted">${timestamp}</small>
-                <a href="${imageUrl}" download="${fileName}" class="btn btn-success btn-sm mt-2">Download</a>
-            `;
-
-            uploadHistory.prepend(historyItem); // Add the new item at the top
+            const result = await response.json();
+            alert(result.message || result.error);
         }
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
